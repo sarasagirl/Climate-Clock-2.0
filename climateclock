@@ -1,0 +1,186 @@
+import time, sys
+import requests, pytz
+from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from PIL import Image, ImageDraw, ImageFont
+from datetime import datetime
+
+options = RGBMatrixOptions()
+options.cols = 64
+options.rows = 64
+options.parallel = 1
+options.gpio_slowdown = 3
+options.drop_privileges=False
+
+panelImageFileName = "panel.jpg"
+imageWidth = 320
+imageHeight = 64
+
+image = Image.new("RGB", (imageWidth, imageHeight), (0, 0, 0))
+draw = ImageDraw.Draw(image)
+font = ImageFont.load_default()
+
+
+def downloadJasonData(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("Failed to download data:", response.status_code, response.text)
+        return None
+
+# Download CC data 
+url = "https://api.climateclock.world/v2/clock.json"
+dataDict = downloadJasonData(url)
+
+# Get X-Day in UTC and EST, and calculate the remaining time.
+xDay = dataDict["data"]["modules"]["carbon_deadline_1"]["timestamp"]
+xdt = datetime.fromisoformat(xDay)
+# print("X-Day in UTC: ", xdt)
+xdtEst = xdt.astimezone( pytz.timezone("EST") )
+deadline = "Deadline in EST: " + str(xdtEst)
+
+nowEst = datetime.now().astimezone( pytz.timezone("EST") )
+
+timeDiffToXDay = xdtEst - nowEst
+yrs = timeDiffToXDay.days // 365
+days = timeDiffToXDay.days % 365
+
+mins = timeDiffToXDay.seconds // 60
+secs = timeDiffToXDay.seconds % 60
+
+hrs = mins // 60
+mins2 = mins % 60
+
+remaining = "Remaining: " + str(yrs) + "years " + str(days) + "days " + str(hrs) + "hours " + str(mins2) + "minutes " + str(secs) + "seconds "
+# Get renewable energy percentage
+initial = dataDict["data"]["modules"]["renewables_1"]["initial"]
+rate = dataDict["data"]["modules"]["renewables_1"]["rate"]
+timestamp = dataDict["data"]["modules"]["renewables_1"]["timestamp"]
+
+timestampUtc = datetime.fromisoformat(timestamp)
+nowUtc = datetime.now().astimezone( pytz.timezone("UTC") )
+timeDiffFromInitial = nowUtc - timestampUtc
+
+renewablesPercentage = initial + rate * timeDiffFromInitial.total_seconds()
+# print(renewablesPercentage)
+renewablesround = ( round(renewablesPercentage, 1) )
+#( round(renewablesPercentage, 0) )
+#( int(round(renewablesPercentage, 0)) )
+renewables = "Renewables Percentage: " + str(renewablesround) + "%"
+
+
+apiKey =  "RVox2RQpfGMqTYDW0BS6RawjjGMby6JIeNzrOWQ3"
+startMonth = "2013-01"
+startYear = "2013"
+
+def downloadJasonData(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("Failed to download data:", response.status_code, response.text)
+        return None
+    
+def makeUsCo2Url(msnId, startMonth, apiKey):
+    url = "https://api.eia.gov/v2/total-energy/data/" + \
+            "?data[]=value" + \
+            "&facets[msn][]=" + msnId + \
+            "&start=" + startMonth + \
+            "&frequency=monthly" + \
+            "&sort[0][column]=period&sort[0][direction]=desc" + \
+            "&length=13" + \
+            "&api_key=" + apiKey
+    return url
+
+def makeMaCo2Url(startYear, apiKey):
+    url = "https://api.eia.gov/v2/co2-emissions/co2-emissions-aggregates/data/" +\
+            "?data[]=value" +\
+            "&facets[stateId][]=MA&facets[fuelId][]=TO&facets[sectorId][]=TT" +\
+            "&start=" + startYear +\
+            "&frequency=annual" +\
+            "&sort[0][column]=period&sort[0][direction]=desc" +\
+            "&length=2" +\
+            "&api_key=" + apiKey
+    return url
+
+# Total energy-related CO2 emission in the US
+url = makeUsCo2Url("TETCEUS", startMonth, apiKey)
+usTotalCo2Dict = downloadJasonData(url)
+# print(usTotalCo2Dict)
+
+usTotalCo2 = usTotalCo2Dict["response"]["data"][0]
+ustotal = str(( usTotalCo2["seriesDescription"]))
+ustotal2022 = str(( usTotalCo2["period"], usTotalCo2["value"]))
+
+usTotalCo2YrAgo = usTotalCo2Dict["response"]["data"][12]
+ustotal2021 = str(( usTotalCo2YrAgo["period"], usTotalCo2YrAgo["value"]))
+
+# Total energy-related residential CO2 emission in the US
+url = makeUsCo2Url("TERCEUS", startMonth, apiKey)
+usResidentialCo2Dict = downloadJasonData(url)
+# print(usResidentialCo2Dict)
+
+usResidentialCo2 = usResidentialCo2Dict["response"]["data"][0]
+ushouse = str(( usResidentialCo2["seriesDescription"]))
+ushouse2022 = str(( usResidentialCo2["period"], usResidentialCo2["value"]))
+
+usResidentialCo2YrAgo = usResidentialCo2Dict["response"]["data"][12]
+ushouse2021 = str(( usResidentialCo2YrAgo["period"], usResidentialCo2YrAgo["value"]))
+
+# Total energy-related CO2 emission in MA
+url = makeMaCo2Url(startYear, apiKey)
+maTotalCo2Dict = downloadJasonData(url)
+# print(maTotalCo2Dict)
+
+maTotalCo2 = maTotalCo2Dict["response"]["data"][0]
+matitle = str(( maTotalCo2["stateId"], maTotalCo2["sector-name"] ))
+ma2020 = str(( maTotalCo2["period"], maTotalCo2["value"] ))
+
+maTotalCo2YrAgo = maTotalCo2Dict["response"]["data"][1]
+ma2019 = str(( maTotalCo2YrAgo["period"], maTotalCo2YrAgo["value"] ))
+
+def makeFirstPanelImage():
+    image = Image.new("RGB", (imageWidth, imageHeight), (0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.text((0, 0),  deadline, fill=(255, 0, 0), font=font)
+    draw.text((0, 16), remaining, fill=(0, 200, 255), font=font)
+    draw.text((0, 32), renewables, fill=(255, 200, 255), font=font)
+    image.save(panelImageFileName)
+    return image
+
+def makeSecondPanelImage():
+    image = Image.new("RGB", (imageWidth, imageHeight), (0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.text((0, 48), matitle, fill=(255, 0, 0), font=font)
+    image.save(panelImageFileName)
+    return image
+
+matrix = RGBMatrix(options = options)
+
+panelInterval = 5
+
+while True:
+    try:
+        for i in range(imageWidth):
+            matrix.SetImage(makeFirstPanelImage(), 10-i)
+            time.sleep(0.1)
+            for j in range(imageWidth):
+                matrix.SetImage(makeSecondPanelImage(), 10-i)
+                time.sleep(0.1)
+        matrix.Clear()
+    except KeyboardInterrupt:
+        break
+
+
+while True:
+    try:
+        for i in range(imageWidth):
+            matrix.SetImage(makeFirstPanelImage(), 10-i)
+            time.sleep(0.1)
+        matrix.Clear()
+        for i in range(imageWidth):
+            matrix.SetImage(makeSecondPanelImage(), 10-i)
+            time.sleep(0.1)
+        matrix.Clear()
+    except KeyboardInterrupt:
+        break
