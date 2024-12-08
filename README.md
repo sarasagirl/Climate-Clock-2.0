@@ -12,6 +12,7 @@ Our project automatically retrieves and calculates the latest data and displays 
 Information from Climate Clock:
 - The remaining time indicated by the Climate Clock, which shows the time left to keep the Earth's average temperature rise below 1.5°C compared to pre-industrial levels
 - The global renewable energy usage rate
+
 Data from the U.S. Energy Information Administration (EIA):
 - The total CO2 emissions from energy consumption in the U.S. (monthly data) and year-on-year reduction rates for the same month
 - CO2 emissions from energy consumption in the U.S. residential sector (monthly data) and year-on-year reduction rates for the same month
