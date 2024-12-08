@@ -20,3 +20,7 @@ Data from the U.S. Energy Information Administration (EIA):
 
 
 By sharing this information, we hope to increase awareness of global warming and inspire actions to combat it.
+
+
+![スクリーンショット 2024-12-08 12 59 20](https://github.com/user-attachments/assets/18162b9b-213f-4a56-853e-9a6e498eb228)
+<img width="530" alt="スクリーンショット 2024-12-08 13 01 19" src="https://github.com/user-attachments/assets/283e37bd-aa53-446d-9dc2-11ab4cb28fc1">
