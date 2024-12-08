@@ -18,7 +18,6 @@ Data from the U.S. Energy Information Administration (EIA):
 - CO2 emissions from energy consumption in the U.S. residential sector (monthly data) and year-on-year reduction rates for the same month
 - The total CO2 emissions from energy consumption in Massachusetts (annual data) and year-on-year reduction rates
 
-
 By sharing this information, we hope to increase awareness of global warming and inspire actions to combat it.
 
 
@@ -26,5 +25,9 @@ By sharing this information, we hope to increase awareness of global warming and
 <img width="530" alt="スクリーンショット 2024-12-08 13 01 19" src="https://github.com/user-attachments/assets/283e37bd-aa53-446d-9dc2-11ab4cb28fc1">
 
 Preview (3.5x speed):
-https://github.com/user-attachments/assets/f5cfad86-c252-4df5-809d-7d3de25dd994
+
+
+
+
+https://github.com/user-attachments/assets/1a72e993-899b-497b-ad04-e38794c097db
 
